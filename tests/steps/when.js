@@ -1,3 +1,5 @@
+const http = require("superagent");
+
 async function viaHandler(functionPath, event) {
     const handler = require(`../../src/functions/${functionPath}`);
     const response = await handler.handler(event);
@@ -5,8 +7,38 @@ async function viaHandler(functionPath, event) {
     return response;
   }
   
-  module.exports.we_invoke_helloWorld = (name) => {
+async function viaHttp(functionPath) {
+    const apiRoot = "https://seswrz5nik.execute-api.eu-west-1.amazonaws.com/dev/api";
+    const method = "GET";
+  
+    const url = `${apiRoot}/${functionPath}`;
+  
+    console.log(url);
+  
+    try {
+      const httpReq = http(method, url);
+      const res = await httpReq;
+  
+      return {
+        statusCode: res.status,
+        body: res.body
+      };
+    } catch (err) {
+      if (err.status) {
+        return {
+          statusCode: err.status
+        };
+      }
+      throw err;
+    }
+}
+  
+module.exports.we_invoke_helloWorld = (name) => {
     const event = { pathParameters: { name: name } };
   
-    return viaHandler("helloWorld", event);
-  }
+    const mode = process.env.TEST_MODE;
+  
+    return mode === "http"
+      ? viaHttp(`helloworld/${name}`, "GET")
+      : viaHandler("helloworld", event);
+}

@@ -1,5 +1,8 @@
 service: gettogether
 
+plugins:
+  - serverless-iam-roles-per-function
+
 provider:
   name: aws
   runtime: nodejs14.x
@@ -13,6 +16,11 @@ functions:
       - http:
           path: api/getGetTogethers
           method: get
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:scan
+        Resource: !GetAtt GetTogethersTable.Arn
+
 
 resources:
   Resources:

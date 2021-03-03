@@ -4,9 +4,6 @@ on:
   push:
     branches:
     - Lesson13
-  workflow_dispatch:
-    branches:
-    - Lesson13
 
 jobs:
   build:

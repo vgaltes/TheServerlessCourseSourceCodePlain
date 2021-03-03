@@ -16,15 +16,14 @@ jobs:
         node-version: 14.x
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm test:integration
     - name: "Configure AWS Credentials"
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ AWS_ACCESS_KEY_ID }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-west-1
     - run: npm run deploy:sit
     - run: npm run seed:sit
     - run: TEST_STAGE=sit npm run test:integration
-    - run: npm run test:acceptance
+    - run: TEST_BASE_URL=${{ secrets.TEST_BASE_URL }} npm run test:acceptance
     - run: npm run deploy:prod

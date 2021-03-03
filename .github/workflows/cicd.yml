@@ -22,9 +22,9 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-west-1
-    - run: TEST_STAGE=sit npm run test:integration
     - run: npm run deploy:sit
     - run: npm run seed:sit
+    - run: TEST_STAGE=sit npm run test:integration
     - run: TEST_STAGE=sit npm run test:integration
     - run: npm run test:acceptance
     - run: npm run deploy:prod

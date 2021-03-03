@@ -1,7 +1,7 @@
 const AWS = require("aws-sdk");
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
-const tableName = 'gettogethers';
+let tableName = process.env.getTogethersTableName;
 
 module.exports.handler = async () => {
   const count = 8;

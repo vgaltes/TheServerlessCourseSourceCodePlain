@@ -1,11 +1,14 @@
 const AWS = require("aws-sdk");
 const chance = require("chance").Chance();
 const sns = new AWS.SNS();
+const Log = require('@dazn/lambda-powertools-logger');
 
 module.exports.handler = async (event, context) => {
   const body = JSON.parse(event.body);
   const getTogetherId = body.getTogetherId;
   const userEmail = body.userEmail;
+
+  Log.info("published 'join_getTogether' event", { getTogetherId, userEmail });
 
   const orderId = chance.guid();
   console.log(`user ${userEmail} joining gettogether ${getTogetherId}`);

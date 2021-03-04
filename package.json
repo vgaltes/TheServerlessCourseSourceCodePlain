@@ -31,6 +31,7 @@
     "superagent": "^6.1.0"
   },
   "dependencies": {
+    "@dazn/lambda-powertools-logger": "^1.28.1",
     "aws-sdk": "^2.853.0",
     "chance": "^1.1.7",
     "middy": "^0.36.0"

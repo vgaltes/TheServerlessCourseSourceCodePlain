@@ -1,17 +1,17 @@
 const AWS = require("aws-sdk");
 const chance = require("chance").Chance();
 const sns = new AWS.SNS();
+const middy = require("middy");
 const Log = require('@dazn/lambda-powertools-logger');
+const correlationIds = require('@dazn/lambda-powertools-middleware-correlation-ids');
 
-module.exports.handler = async (event, context) => {
+const handler = async (event, context) => {
   const body = JSON.parse(event.body);
   const getTogetherId = body.getTogetherId;
   const userEmail = body.userEmail;
 
-  Log.info("published 'join_getTogether' event", { getTogetherId, userEmail });
-
   const orderId = chance.guid();
-  console.log(`user ${userEmail} joining gettogether ${getTogetherId}`);
+  Log.info('user joining gettogether', {userEmail, getTogetherId});
 
   const data = {
     orderId,
@@ -26,7 +26,7 @@ module.exports.handler = async (event, context) => {
 
   await sns.publish(params).promise();
 
-  console.log("published 'join_getTogether' event");
+  Log.info("published 'join_getTogether' event", {getTogetherId, userEmail});
 
   const response = {
     statusCode: 200,
@@ -35,3 +35,6 @@ module.exports.handler = async (event, context) => {
 
   return response;
 };
+
+module.exports.handler = middy(handler)
+  .use(correlationIds({ sampleDebugLogRate: 0 }));

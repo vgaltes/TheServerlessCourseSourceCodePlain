@@ -10,6 +10,8 @@ custom:
   getTogethersTableName: ${self:provider.stage}-gettogethers
   joinGetTogetherSnsTopicName: ${self:provider.stage}-joingettogethers
   joinGetTogetherSnsTopicArn: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${self:custom.joinGetTogetherSnsTopicName}
+  notifyOrganiserDLQSnsTopicName: ${self:provider.stage}-notifyOrganiserDLQ
+  notifyOrganiserDLQSnsTopic: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${self:custom.notifyOrganiserDLQSnsTopicName}
 
 provider:
   name: aws
@@ -31,13 +33,23 @@ functions:
       - Effect: Allow
         Action: ssm:GetParameters*
         Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/gettogethers/${self:provider.stage}/*
-
     environment:
       getTogethersTableNamePath: /gettogethers/${self:provider.stage}/secureTableName
   notifyOrganiser:
     handler: src/functions/notifyOrganiser.handler
+    onError: !Ref NotifyOrganiserDLQSnsTopic
     events:
       - sns: ${self:custom.joinGetTogetherSnsTopicName}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: sns:Publish
+        Resource: !Ref NotifyOrganiserDLQSnsTopic
+  notifyOrganiserDLQ:
+    handler: src/functions/notifyOrganiserDLQ.handler
+    events:
+      - sns: 
+          arn: !Ref NotifyOrganiserDLQSnsTopic
+          topicName: ${self:custom.notifyOrganiserDLQSnsTopicName}
   joinGetTogether:
     handler: src/functions/joinGetTogether.handler
     events:
@@ -64,3 +76,7 @@ resources:
           - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+    NotifyOrganiserDLQSnsTopic:
+      Type: AWS::SNS::Topic
+      Properties: 
+        TopicName: ${self:custom.notifyOrganiserDLQSnsTopicName}

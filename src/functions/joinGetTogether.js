@@ -1,8 +1,9 @@
-const AWS = require("aws-sdk");
+const AWSXray = require("aws-xray-sdk");
 const chance = require("chance").Chance();
 const middy = require("middy");
 const Log = require('@dazn/lambda-powertools-logger');
-const SNS = require('@dazn/lambda-powertools-sns-client')
+const SNSClient = require('@dazn/lambda-powertools-sns-client')
+const SNS = AWSXray.captureAWSClient(SNSClient);
 const correlationIds = require('@dazn/lambda-powertools-middleware-correlation-ids');
 
 const handler = async (event, context) => {

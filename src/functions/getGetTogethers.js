@@ -1,8 +1,14 @@
-const AWS = require("aws-sdk");
+const AWSXray = require("aws-xray-sdk");
+const AWS = AWSXray.captureAWS(require('aws-sdk'));
+
+const dynamodb = new AWS.DynamoDB.DocumentClient({
+  service: new AWS.DynamoDB()
+});
+AWSXray.captureAWSClient(dynamodb.service);
+
+
 const middy = require("middy");
 const { ssm } = require("middy/middlewares");
-
-const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 const handler = async (evt, context) => {
   const count = 8;

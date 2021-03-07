@@ -20,6 +20,13 @@ provider:
   stage: ${opt:stage, self:custom.defaultStage}
   tracing:
     lambda: true
+    apiGateway: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
+      Resource: "*"
 
 functions:
   getGetTogethers:
@@ -28,6 +35,7 @@ functions:
       - http:
           path: api/getGetTogethers
           method: get
+    iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:scan
@@ -42,6 +50,7 @@ functions:
     onError: !Ref NotifyOrganiserDLQSnsTopic
     events:
       - sns: ${self:custom.joinGetTogetherSnsTopicName}
+    iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action: sns:Publish
@@ -60,6 +69,7 @@ functions:
           method: post
     environment:
       joinGetTogetherSnsTopic: ${self:custom.joinGetTogetherSnsTopicArn}
+    iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action: sns:Publish

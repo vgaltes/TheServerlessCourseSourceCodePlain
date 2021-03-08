@@ -5,6 +5,10 @@ provider:
   runtime: dotnetcore3.1
   region: ${opt:region, self:custom.defaultRegion}
   stage: ${opt:stage, self:custom.defaultStage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action: ssm:GetParameter*
+      Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/gettogethers/dev/*
 
 custom:
   defaultRegion: eu-west-1

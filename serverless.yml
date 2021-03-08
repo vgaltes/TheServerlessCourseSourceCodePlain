@@ -62,6 +62,13 @@ provider:
         - xray:PutTraceSegments
         - xray:PutTelemetryRecords
       Resource: "*"
+  httpApi:
+    authorizers:
+      auth0JwtAuthorizer:
+        identitySource: $request.header.Authorization
+        issuerUrl: https://vgaltes.eu.auth0.com/
+        audience:
+          - https://tihgps0zh8.execute-api.eu-west-1.amazonaws.com/dev/api/
 
 functions:
   auth:
@@ -77,6 +84,11 @@ functions:
           path: api/getGetTogethers
           method: get
           authorizer: auth
+      - httpApi:
+          path: /httpApi/getTogethers
+          method: get
+          authorizer:
+            name: auth0JwtAuthorizer
     iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow

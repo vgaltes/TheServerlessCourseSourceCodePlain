@@ -2,7 +2,6 @@ service: gettogether
 
 plugins:
   - serverless-iam-roles-per-function
-  - serverless-pseudo-parameters
   - serverless-plugin-aws-alerts
 
 custom:
@@ -65,12 +64,19 @@ provider:
       Resource: "*"
 
 functions:
+  auth:
+    handler: src/functions/auth0CustomAuthorizer.handler
+    environment:
+      AUDIENCE: https://tihgps0zh8.execute-api.eu-west-1.amazonaws.com/dev/api/
+      TOKEN_ISSUER: https://vgaltes.eu.auth0.com/
+      JWKS_URI: https://vgaltes.eu.auth0.com/.well-known/jwks.json
   getGetTogethers:
     handler: src/functions/getGetTogethers.handler
     events:
       - http:
           path: api/getGetTogethers
           method: get
+          authorizer: auth
     iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
@@ -81,6 +87,8 @@ functions:
         Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/gettogethers/${self:provider.stage}/*
     environment:
       getTogethersTableNamePath: /gettogethers/${self:provider.stage}/secureTableName
+      
+
   notifyOrganiser:
     handler: src/functions/notifyOrganiser.handler
     onError: !Ref NotifyOrganiserDLQSnsTopic

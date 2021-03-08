@@ -1,0 +1,22 @@
+service: nethelloworld
+
+provider:
+  name: aws
+  runtime: dotnetcore3.1
+  region: ${opt:region, self:custom.defaultRegion}
+  stage: ${opt:stage, self:custom.defaultStage}
+
+custom:
+  defaultRegion: eu-west-1
+  defaultStage: dev${env:SLSUSER, ""}
+
+package:
+  artifact: bin/Release/netcoreapp3.1/ServerlessCourse.HelloWorld.zip
+    
+functions:
+  Greeter:
+    handler: ServerlessCourse.HelloWorld::ServerlessCourse.HelloWorld.Greeter::Handler
+    events:
+      - http: 
+          method: get
+          path: api/greeter

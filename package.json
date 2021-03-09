@@ -36,6 +36,8 @@
     "@dazn/lambda-powertools-middleware-correlation-ids": "^1.28.1",
     "@dazn/lambda-powertools-sns-client": "^1.28.1",
     "aws-sdk": "^2.853.0",
+    "aws4": "^1.11.0",
+    "axios": "^0.21.1",
     "chance": "^1.1.7",
     "middy": "^0.36.0"
   }

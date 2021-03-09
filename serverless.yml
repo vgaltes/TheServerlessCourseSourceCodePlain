@@ -66,6 +66,24 @@ functions:
       - Effect: Allow
         Action: sns:Publish
         Resource: ${self:custom.joinGetTogetherSnsTopicArn}
+  cognitoPublic:
+    handler: src/functions/cognitoPublic.handler
+    events:
+      - http:
+          path: api/cognitoPublic
+          method: get
+          cors: true
+  cognitoPrivate:
+    handler: src/functions/cognitoPrivate.handler
+    events:
+      - http:
+          path: api/cognitoPrivate
+          method: get
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
 
 resources:
   Resources:
@@ -102,4 +120,3 @@ resources:
         UserPoolId:
           Ref: CognitoUserPool
         GenerateSecret: false
-        

@@ -44,13 +44,22 @@ functions:
       getTogethersTableNamePath: /gettogethers/${self:provider.stage}/secureTableName
   notifyOrganiser:
     handler: src/functions/notifyOrganiser.handler
-    onError: !Ref NotifyOrganiserDLQSnsTopic
+    # onError: !Ref NotifyOrganiserDLQSnsTopic
     events:
       - sns: ${self:custom.joinGetTogetherSnsTopicName}
     iamRoleStatements:
       - Effect: Allow
         Action: sns:Publish
         Resource: !Ref NotifyOrganiserDLQSnsTopic
+      - Effect: Allow
+        Action: lambda:InvokeFunction
+        Resource: !GetAtt DestinationOKLambdaFunction.Arn
+      - Effect: Allow
+        Action: lambda:InvokeFunction
+        Resource: !GetAtt DestinationKOLambdaFunction.Arn
+    destinations:
+      onSuccess: destinationOK
+      onFailure: destinationKO
   notifyOrganiserDLQ:
     handler: src/functions/notifyOrganiserDLQ.handler
     events:
@@ -69,6 +78,7 @@ functions:
       - Effect: Allow
         Action: sns:Publish
         Resource: ${self:custom.joinGetTogetherSnsTopicArn}
+      
   cognitoPublic:
     handler: src/functions/cognitoPublic.handler
     events:
@@ -99,6 +109,10 @@ functions:
           path: api/iamPrivate
           method: get
           authorizer: aws_iam
+  destinationOK:
+    handler: src/functions/destinationOK.handler
+  destinationKO:
+    handler: src/functions/destinationKO.handler
 
 resources:
   Resources:

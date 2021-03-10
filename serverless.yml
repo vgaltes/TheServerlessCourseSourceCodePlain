@@ -1,10 +1,15 @@
 service: gettogether
-useDotenv: true
 
 plugins:
   - serverless-iam-roles-per-function
   - serverless-pseudo-parameters
-  - serverless-lumigo
+
+package:
+  exclude:
+    - WebAuth/**
+    - data/**
+    - .github/**
+    - tests/**
 
 custom:
   defaultRegion: eu-west-1
@@ -14,21 +19,13 @@ custom:
   joinGetTogetherSnsTopicArn: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${self:custom.joinGetTogetherSnsTopicName}
   notifyOrganiserDLQSnsTopicName: ${self:provider.stage}-notifyOrganiserDLQ
   notifyOrganiserDLQSnsTopic: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${self:custom.notifyOrganiserDLQSnsTopicName}
-  lumigo:
-    token: ${env:LUMIGO_TOKEN}
 
 provider:
   name: aws
   runtime: nodejs14.x
   region: ${opt:region, self:custom.defaultRegion}
   stage: ${opt:stage, self:custom.defaultStage}
-  logs:
-    restApi:
-      accessLogging: true
-      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","resourcePath":"$context.resourcePath","status":$context.status,"responseLatency":$context.responseLatency}'
-      executionLogging: false # Turn off execution logs b/c they're too noisy.
-      # https://www.alexdebrie.com/posts/api-gateway-access-logs/#serverless-framework
-
+  
 functions:
   getGetTogethers:
     handler: src/functions/getGetTogethers.handler
@@ -77,20 +74,12 @@ functions:
     events:
       - http:
           path: api/cognitoPublic
-          method: get
+          method: post
           cors: true
-  cognitoPrivate:
-    handler: src/functions/cognitoPrivate.handler
-    events:
-      - http:
-          path: api/cognitoPrivate
-          method: get
-          cors: true
-          authorizer:
-            name: CognitoAuthorizer
-            type: COGNITO_USER_POOLS
-            arn: !GetAtt CognitoUserPool.Arn
-        
+          request:
+            schema:
+              application/json: ${file(schema.json)}
+              
   iamPublic:
     handler: src/functions/iamPublic.handler
     events:
@@ -129,20 +118,3 @@ resources:
       Properties: 
         TopicName: ${self:custom.notifyOrganiserDLQSnsTopicName}
         
-    CognitoUserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UserPoolName: ${self:provider.stage}-testauthsls-user-pool
-        # Allow email addresses to be used as username
-        UsernameAttributes:
-          - email
-        AutoVerifiedAttributes:
-          - email
-
-    CognitoUserPoolClient:
-      Type: AWS::Cognito::UserPoolClient
-      Properties:
-        ClientName: ${self:provider.stage}-testauthsls-user-pool-client
-        UserPoolId:
-          Ref: CognitoUserPool
-        GenerateSecret: false

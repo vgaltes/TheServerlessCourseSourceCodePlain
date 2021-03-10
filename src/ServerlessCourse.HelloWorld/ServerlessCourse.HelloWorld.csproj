@@ -8,8 +8,10 @@
     <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.4.0" />
     <PackageReference Include="Amazon.Lambda.Core" Version="1.2.0" />
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.1.0" />
-    <PackageReference Include="Voxel.MiddyNet" Version="1.1.1" />
-    <PackageReference Include="Voxel.MiddyNet.SSMMiddleware" Version="1.1.1" />
+    <PackageReference Include="Amazon.Lambda.SNSEvents" Version="1.2.0" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.5.1.48" />
+    <PackageReference Include="AWSXRayRecorder.Core" Version="2.10.0" />
+    <PackageReference Include="AWSXRayRecorder.Handlers.AwsSdk" Version="2.8.2" />
   </ItemGroup>
 
 </Project>

@@ -5,10 +5,21 @@ provider:
   runtime: dotnetcore3.1
   region: ${opt:region, self:custom.defaultRegion}
   stage: ${opt:stage, self:custom.defaultStage}
+  tracing:
+    lambda: true
+    apiGateway: true
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
+      Resource: "*"
     - Effect: Allow
       Action: ssm:GetParameter*
       Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/gettogethers/dev/*
+    - Effect: Allow
+      Action: sns:Publish
+      Resource: !Ref DotNetNotifier
 
 custom:
   defaultRegion: eu-west-1
@@ -18,9 +29,24 @@ package:
   artifact: bin/Release/netcoreapp3.1/ServerlessCourse.HelloWorld.zip
     
 functions:
-  Greeter:
-    handler: ServerlessCourse.HelloWorld::ServerlessCourse.HelloWorld.Greeter::Handler
+  Sender:
+    handler: ServerlessCourse.HelloWorld::ServerlessCourse.HelloWorld.Sender::Handler
     events:
       - http: 
           method: get
-          path: api/greeter
+          path: api/sender/{name}
+    environment:
+      topicArn: !Ref DotNetNotifier
+  Receiver:
+    handler: ServerlessCourse.HelloWorld::ServerlessCourse.HelloWorld.Receiver::Handler
+    events:
+      - sns:
+          arn: !Ref DotNetNotifier
+          topicName: ${self:provider.stage}-dotnetnotifier
+
+resources:
+  Resources:
+    DotNetNotifier:
+      Type: AWS::SNS::Topic
+      Properties: 
+        TopicName: ${self:provider.stage}-dotnetnotifier

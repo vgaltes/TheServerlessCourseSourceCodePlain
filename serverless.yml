@@ -2,7 +2,6 @@ service: gettogether
 
 plugins:
   - serverless-iam-roles-per-function
-  - serverless-pseudo-parameters
   - serverless-apigateway-service-proxy
 
 package:
@@ -38,6 +37,31 @@ provider:
   runtime: nodejs14.x
   region: ${opt:region, self:custom.defaultRegion}
   stage: ${opt:stage, self:custom.defaultStage}
+  apiGateway:
+    apiKeys:
+      - free:
+          - myFreeKey
+          - ${self:provider.stage}-myFreeKey
+      - paid:
+          - myPaidKey
+          - ${self:provider.stage}-myPaidKey
+    usagePlan:
+      - free:
+          quota:
+            limit: 100
+            offset: 0
+            period: DAY
+          throttle:
+            burstLimit: 2
+            rateLimit: 1
+      - paid:
+          quota:
+            limit: 50000
+            offset: 1
+            period: MONTH
+          throttle:
+            burstLimit: 2000
+            rateLimit: 1000
   
 functions:
   getGetTogethers:
@@ -99,9 +123,7 @@ functions:
           path: api/cognitoPublic
           method: post
           cors: true
-          request:
-            schema:
-              application/json: ${file(schema.json)}
+          private: true
               
   iamPublic:
     handler: src/functions/iamPublic.handler
